@@ -1,0 +1,1 @@
+https://pedromoraes7.pages.dev/oauth/callback/google
