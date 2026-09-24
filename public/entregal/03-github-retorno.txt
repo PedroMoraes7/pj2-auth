@@ -1,0 +1,2 @@
+Homepage URL: https://pedromoraes7.pages.dev
+Redirect URI: https://pedromoraes7.pages.dev/oauth/callback/github
