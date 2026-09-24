@@ -99,6 +99,8 @@ export async function onRequestGet(context) {
       
       subject = payload.sub;
       issuer = payload.iss;
+      email = payload.email; // Adicionar esta linha
+      displayName = payload.name; // Adicionar esta linha
   } 
   else if (provider === "github") {
       // 9. Exigir access_token e token_type Bearer[cite: 1]
@@ -119,8 +121,10 @@ export async function onRequestGet(context) {
       if (userRes.status !== 200) return new Response("GitHub fetch failed", { status: 400, headers: { "Cache-Control": "no-store" } });
       const userData = await userRes.json();
       
-      subject = String(userData.id); // Identificador numérico convertido em texto[cite: 1]
+      subject = String(userData.id); 
       issuer = "https://github.com";
+      email = userData.email || null; // Adicionar esta linha (pode ser nulo como o PDF prevê)
+      displayName = userData.name || userData.login; // Adicionar esta linha[cite: 1]
 
       // 10. Enviar DELETE para revogar a autorização da OAuth App[cite: 1]
       const revokeCredentials = btoa(`${clientId}:${clientSecret}`);
@@ -145,8 +149,8 @@ export async function onRequestGet(context) {
   const sessionExpiresAt = now + 28800; // Sessão de 8 horas[cite: 1]
 
   await context.env.DB.prepare(
-    `INSERT INTO sessions (id_hash, issuer, subject, expires_at, created_at) VALUES (?, ?, ?, ?, ?)`
-  ).bind(sessionHash, issuer, subject, sessionExpiresAt, now).run(); // Grava sessão[cite: 1]
+    `INSERT INTO sessions (id_hash, issuer, subject, email, display_name, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).bind(sessionHash, issuer, subject, email, displayName, sessionExpiresAt, now).run();
 
   const headers = new Headers();
   headers.append("Location", context.env.PUBLIC_BASE_URL);
