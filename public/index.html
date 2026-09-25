@@ -1,24 +1,152 @@
-<!doctype html> 
-<html lang="pt-BR"> 
-<head> 
-<meta charset="utf-8"> 
-<meta name="viewport" content="width=device-width, initial-scale=1"> 
-<title>Laboratório de autenticação</title> 
-</head> 
-<body> 
-<main> 
-<h1>Laboratório de autenticação</h1> 
-<p id="status">A sessão ainda não foi consultada.</p> 
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Seguro</title>
+    <style>
+        /* Paleta de Cores e Configurações Globais */
+        :root {
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
 
-<a href="/oauth/login/google">Entrar com Google</a>
-<a href="/oauth/login/github">Entrar com GitHub</a>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
-<form method="post" action="/oauth/logout">
-  <button type="submit">Sair</button>
-</form>
+        /* Estilo do Cartão Central */
+        .login-card {
+            background-color: var(--bg-card);
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-sizing: border-box;
+        }
 
-<p id="status">A sessão ainda não foi consultada.</p>
-</main> 
-<script src="/app.js"></script>
-</body> 
+        .login-card h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #111827;
+        }
+
+        .login-card p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        /* Botões Base */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        /* Botão Google */
+        .btn-google {
+            background-color: #ffffff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+        }
+
+        .btn-google:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+        }
+
+        /* Botão GitHub */
+        .btn-github {
+            background-color: #24292e;
+            color: #ffffff;
+            border: 1px solid #24292e;
+        }
+
+        .btn-github:hover {
+            background-color: #000000;
+        }
+
+        /* Caixa de Status da Sessão */
+        .status-box {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        #status {
+            margin: 0;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #374151;
+            word-break: break-word;
+        }
+
+        /* Botão de Sair */
+        form {
+            margin-top: 1rem;
+            margin-bottom: 0;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            font-size: 0.9rem;
+        }
+
+        .btn-logout:hover {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="login-card">
+        <h1>Bem-vindo</h1>
+        <p class="subtitle">Escolha o seu provedor para entrar</p>
+
+        <!-- Ligações de autenticação intactas -->
+        <a href="/oauth/login/google" class="btn btn-google">Entrar com Google</a>
+        <a href="/oauth/login/github" class="btn btn-github">Entrar com GitHub</a>
+
+        <!-- Mensagem de status controlada pelo app.js -->
+        <div class="status-box">
+            <p id="status">A consultar sessão...</p>
+        </div>
+
+        <!-- Formulário de saída intacto -->
+        <form method="post" action="/oauth/logout">
+            <button type="submit" class="btn btn-logout">Sair da Conta</button>
+        </form>
+    </main>
+
+    <!-- Script obrigatório -->
+    <script src="/app.js"></script>
+</body>
 </html>
