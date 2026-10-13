@@ -1,4 +1,4 @@
-CREATE TABELAAAAAA notas (
+CREATE table notas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     aluno TEXT NOT NULL,
     valor REAL
