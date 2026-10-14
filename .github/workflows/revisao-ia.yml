@@ -33,6 +33,7 @@ jobs:
         with:
           prompt-file: prompt.txt
           system-prompt: Você é um revisor de código objetivo.
+          token: ${{ secrets.COPILOT_PAT }}
       - name: Comenta no PR
         env:
           GH_TOKEN: ${{ github.token }}
