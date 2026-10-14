@@ -12,28 +12,50 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+
       - run: npm install -g @github/copilot
+
+      - name: Verificar segredo COPILOT_PAT
+        env:
+          PAT: ${{ secrets.COPILOT_PAT }}
+        run: |
+          if [ -z "$PAT" ]; then
+            echo "::error::secrets.COPILOT_PAT não está definido (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          echo "COPILOT_PAT presente (valor não exibido)."
+
       - name: Monta o prompt
         run: |
           {
-          echo "Revise o diff de um site com Cloudflare Pages Functions e D1."
-          echo "Aponte, em português e em até 10 itens segredos expostos,"
-          echo "SQL montado por concatenação em vez de prepare().bind(), e erros de lógica."
-          echo '```diff'
-          git diff origin/${{ github.base_ref }}...HEAD | head -c 20000
-          echo '```'
+            echo "Revise o diff de um site com Cloudflare Pages Functions e D1."
+            echo "Aponte, em português e em até 10 itens: segredos expostos,"
+            echo "SQL montado por concatenação em vez de prepare().bind(), e erros de lógica."
+            echo '```diff'
+            git diff origin/${{ github.base_ref }}...HEAD | head -c 20000
+            echo '```'
           } > prompt.txt
+
       - id: ia
-        uses: actions/ai-inference@v1
+        uses: actions/ai-inference@v2.1.0
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
         with:
+          provider: copilot
+          model: gpt-4.1
           prompt-file: prompt.txt
           system-prompt: Você é um revisor de código objetivo.
+
       - name: Comenta no PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment ${{ github.event.pull_request.number }} --body-file "${{ steps.ia.outputs.response-file }}"
+        run: |
+          if [ -z "${{ steps.ia.outputs.response-file }}" ]; then
+            echo "::error::A ação de IA não gerou arquivo de resposta."
+            exit 1
+          fi
+          gh pr comment ${{ github.event.pull_request.number }} --body-file "${{ steps.ia.outputs.response-file }}"
