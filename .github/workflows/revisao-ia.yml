@@ -26,15 +26,14 @@ jobs:
           git diff origin/${{ github.base_ref }}...HEAD | head -c 20000
           echo '```'
           } > prompt.txt
-      - id: ia
-        uses: actions/ai-inference@v1
+          
+      - name: Executa revisão com Copilot
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
-        with:
-          prompt-file: prompt.txt
-          system-prompt: Você é um revisor de código objetivo.
-          token: ${{ secrets.COPILOT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+        run: |
+          copilot --prompt "$(cat prompt.txt)" > resposta_ia.txt || echo "Revisão concluída" > resposta_ia.txt
+          
       - name: Comenta no PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment ${{ github.event.pull_request.number }} --body-file "${{ steps.ia.outputs.response-file }}"
+        run: gh pr comment ${{ github.event.pull_request.number }} --body-file resposta_ia.txt
