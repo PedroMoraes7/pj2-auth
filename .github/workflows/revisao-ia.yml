@@ -12,10 +12,22 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+
       - run: npm install -g @github/copilot
+
+      - name: Verificar segredo COPILOT_PAT
+        run: |
+          if [ -z "${{ secrets.COPILOT_PAT }}" ]; then
+            echo "Erro: secrets.COPILOT_PAT não está definido. Defina o secret em Settings → Secrets → Actions."
+            exit 1
+          else
+            echo "COPILOT_PAT presente (valor não exibido por segurança)."
+          fi
+
       - name: Monta o prompt
         run: |
           {
@@ -26,14 +38,25 @@ jobs:
           git diff origin/${{ github.base_ref }}...HEAD | head -c 20000
           echo '```'
           } > prompt.txt
-          
-      - name: Executa revisão com Copilot
+
+      - id: ia
+        uses: actions/ai-inference@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
-        run: |
-          copilot --prompt "$(cat prompt.txt)" > resposta_ia.txt || echo "Revisão concluída" > resposta_ia.txt
-          
+          # mantém o COPILOT_PAT como você já usava. Confirme que esse token é o correto para a action.
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+          # habilita logs mais verbosos se você tiver ACTIONS_STEP_DEBUG=true como secret (temporário)
+          ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG || '' }}
+        with:
+          prompt-file: prompt.txt
+          system-prompt: Você é um revisor de código objetivo.
+          token: ${{ secrets.COPILOT_PAT }}
+
       - name: Comenta no PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment ${{ github.event.pull_request.number }} --body-file resposta_ia.txt
+        run: |
+          if [ -z "${{ steps.ia.outputs.response-file }}" ]; then
+            echo "Ação de IA não produziu arquivo de resposta: verifique logs da action."
+            exit 1
+          fi
+          gh pr comment ${{ github.event.pull_request.number }} --body-file "${{ steps.ia.outputs.response-file }}"
