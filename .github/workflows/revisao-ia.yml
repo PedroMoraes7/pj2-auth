@@ -20,43 +20,42 @@ jobs:
       - run: npm install -g @github/copilot
 
       - name: Verificar segredo COPILOT_PAT
+        env:
+          PAT: ${{ secrets.COPILOT_PAT }}
         run: |
-          if [ -z "${{ secrets.COPILOT_PAT }}" ]; then
-            echo "Erro: secrets.COPILOT_PAT não está definido. Defina o secret em Settings → Secrets → Actions."
+          if [ -z "$PAT" ]; then
+            echo "::error::secrets.COPILOT_PAT não está definido (Settings > Secrets and variables > Actions)."
             exit 1
-          else
-            echo "COPILOT_PAT presente (valor não exibido por segurança)."
           fi
+          echo "COPILOT_PAT presente (valor não exibido)."
 
       - name: Monta o prompt
         run: |
           {
-          echo "Revise o diff de um site com Cloudflare Pages Functions e D1."
-          echo "Aponte, em português e em até 10 itens segredos expostos,"
-          echo "SQL montado por concatenação em vez de prepare().bind(), e erros de lógica."
-          echo '```diff'
-          git diff origin/${{ github.base_ref }}...HEAD | head -c 20000
-          echo '```'
+            echo "Revise o diff de um site com Cloudflare Pages Functions e D1."
+            echo "Aponte, em português e em até 10 itens: segredos expostos,"
+            echo "SQL montado por concatenação em vez de prepare().bind(), e erros de lógica."
+            echo '```diff'
+            git diff origin/${{ github.base_ref }}...HEAD | head -c 20000
+            echo '```'
           } > prompt.txt
 
       - id: ia
-        uses: actions/ai-inference@v1
+        uses: actions/ai-inference@v2.1.0
         env:
-          # mantém o COPILOT_PAT como você já usava. Confirme que esse token é o correto para a action.
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
-          # habilita logs mais verbosos se você tiver ACTIONS_STEP_DEBUG=true como secret (temporário)
-          ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG || '' }}
         with:
+          provider: copilot
+          model: ""
           prompt-file: prompt.txt
           system-prompt: Você é um revisor de código objetivo.
-          token: ${{ secrets.COPILOT_PAT }}
 
       - name: Comenta no PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "${{ steps.ia.outputs.response-file }}" ]; then
-            echo "Ação de IA não produziu arquivo de resposta: verifique logs da action."
+            echo "::error::A ação de IA não gerou arquivo de resposta."
             exit 1
           fi
           gh pr comment ${{ github.event.pull_request.number }} --body-file "${{ steps.ia.outputs.response-file }}"
