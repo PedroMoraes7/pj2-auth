@@ -78,4 +78,4 @@ Declarar `permissions` aplica o princípio do privilégio mínimo: o token fica 
 
 **4. A revisão da IA pode substituir o status check da Tarefa 2? Justifique com o que você observou no item 4 da Tarefa 3.**
 
-Não. No item 4 da Tarefa 3 observei que a IA fez uma afirmação [errada / exagerada: resuma em uma frase o que você escreveu na crítica acima], o que mostra que o resultado dela é falível e varia de uma execução para outra. Além disso, a revisão da IA só publica um comentário e não aprova nem bloqueia o merge, enquanto o status check é determinístico e é o que a regra da main consegue exigir. A IA serve como apoio à revisão, mas a barreira de qualidade continua sendo o check automático.
+Não. No item 4 da Tarefa 3 observei que a IA fez uma afirmação, o que mostra que o resultado dela é falível e varia de uma execução para outra. Além disso, a revisão da IA só publica um comentário e não aprova nem bloqueia o merge, enquanto o status check é determinístico e é o que a regra da main consegue exigir. A IA serve como apoio à revisão, mas a barreira de qualidade continua sendo o check automático.
